@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2020 The exTHmUI Open Source Project
+ * Copyright (C) 2021 Syberia Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +72,7 @@ public class GamingService extends Service {
     private static final int NOTIFICATION_ID = 1;
 
     private Intent mOverlayServiceIntent;
+    private Intent mFPSServiceIntent;
     private Notification mGamingNotification;
 
     private Intent mCallStatusIntent;
@@ -88,6 +90,7 @@ public class GamingService extends Service {
     private GamingPhoneStateListener mPhoneStateListener;
 
     private boolean mMenuOverlay;
+    private boolean mFPSOverlay;
 
     private BroadcastReceiver mGamingModeOffReceiver = new BroadcastReceiver() {
         @Override
@@ -119,6 +122,8 @@ public class GamingService extends Service {
                 setDisableAutoBrightness(intent.getBooleanExtra("value", Constants.ConfigDefaultValues.DISABLE_AUTO_BRIGHTNESS), false);
             } else if (Constants.GamingActionTargets.DISABLE_GESTURE.equals(target)) {
                 setDisableGesture(intent.getBooleanExtra("value", Constants.ConfigDefaultValues.DISABLE_GESTURE));
+            } else if (Constants.GamingActionTargets.SHOW_FPSINFO.equals(target)) {
+                setShowFPSInfo(intent.getBooleanExtra("value", Constants.ConfigDefaultValues.FPS_INFO));
             } else if (Constants.GamingActionTargets.DISABLE_RINGTONE.equals(target)) {
                 setDisableRingtone(intent.getBooleanExtra("value", Constants.ConfigDefaultValues.DISABLE_RINGTONE));
             } else if (Constants.GamingActionTargets.SHOW_DANMAKU.equals(target)) {
@@ -164,6 +169,7 @@ public class GamingService extends Service {
         mCallStatusIntent = new Intent(Constants.Broadcasts.BROADCAST_CALL_STATUS);
 
         mOverlayServiceIntent = new Intent(this, OverlayService.class);
+        mFPSServiceIntent = new Intent(this, FPSInfoService.class);
 
         PendingIntent stopGamingIntent = PendingIntent.getBroadcast(this, 0, new Intent(Constants.Broadcasts.SYS_BROADCAST_GAMING_MODE_OFF), 0);
         Notification.Builder builder = new Notification.Builder(this, Constants.CHANNEL_GAMING_MODE_STATUS);
@@ -186,8 +192,10 @@ public class GamingService extends Service {
         }
 
         mMenuOverlay = getIntSetting(Constants.ConfigKeys.MENU_OVERLAY, Constants.ConfigDefaultValues.MENU_OVERLAY) == 1 ? true : false;
+        mFPSOverlay = getBooleanSetting(Constants.ConfigKeys.SHOW_FPSINFO, Constants.ConfigDefaultValues.FPS_INFO);
         mOverlayServiceIntent.putExtras(mCurrentConfig);
         if (mMenuOverlay) startServiceAsUser(mOverlayServiceIntent, UserHandle.CURRENT);
+        if (mFPSOverlay) startServiceAsUser(mFPSServiceIntent, UserHandle.CURRENT);
         Settings.System.putInt(getContentResolver(), Settings.System.GAMING_MODE_ACTIVE, 1);
         if (mTelephonyManager != null) {
             mCallStatusIntent.putExtra("state", mTelephonyManager.getCallState());
@@ -258,6 +266,10 @@ public class GamingService extends Service {
         // menu opacity
         mCurrentConfig.putInt(Constants.ConfigKeys.MENU_OVERLAY, getIntSetting(Constants.ConfigKeys.MENU_OVERLAY, Constants.ConfigDefaultValues.MENU_OVERLAY));
 
+        // fps info
+        mFPSOverlay = getBooleanSetting(Constants.ConfigKeys.SHOW_FPSINFO, Constants.ConfigDefaultValues.FPS_INFO);
+        setShowFPSInfo(mFPSOverlay);
+
         Intent intent = new Intent(Constants.Broadcasts.BROADCAST_CONFIG_CHANGED);
         intent.putExtras(mCurrentConfig);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -274,6 +286,16 @@ public class GamingService extends Service {
 
     private void setShowDanmaku(boolean show) {
         mCurrentConfig.putBoolean(Constants.ConfigKeys.SHOW_DANMAKU, show);
+    }
+
+    private void setShowFPSInfo(boolean show) {
+        mCurrentConfig.putBoolean(Constants.ConfigKeys.SHOW_FPSINFO, show);
+        mFPSOverlay = show;
+        if (!mFPSOverlay) {
+             stopServiceAsUser(mFPSServiceIntent, UserHandle.CURRENT);
+        } else {
+             startServiceAsUser(mFPSServiceIntent, UserHandle.CURRENT);
+        }
     }
 
     private void setPerformanceLevel(int level) {
@@ -327,6 +349,7 @@ public class GamingService extends Service {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mCallControlReceiver);
         if (mMenuOverlay) stopServiceAsUser(mOverlayServiceIntent, UserHandle.CURRENT);
         mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        setShowFPSInfo(false);
         setDisableGesture(false);
         setDisableAutoBrightness(false, true);
         setDisableRingtone(false);

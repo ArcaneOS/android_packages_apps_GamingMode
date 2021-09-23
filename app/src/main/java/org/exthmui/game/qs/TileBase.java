@@ -90,6 +90,10 @@ public class TileBase extends LinearLayout implements View.OnClickListener {
         needInverse = val;
     }
 
+    public boolean isAvailable() {
+        return true;
+    }
+
     @Override
     public void onClick(View v) {
         intent.putExtra("value", !isSelected);
@@ -97,6 +101,5 @@ public class TileBase extends LinearLayout implements View.OnClickListener {
     }
 
     public void onDestroy() {
-        
     }
 }

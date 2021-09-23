@@ -79,6 +79,9 @@ public class Constants {
         public static final String MENU_OPACITY = Settings.System.GAMING_MODE_MENU_OPACITY;
 
         public static final String MENU_OVERLAY = Settings.System.GAMING_MODE_USE_OVERLAY_MENU;
+
+        public static final String SHOW_FPSINFO = Settings.System.GAMING_MODE_SHOW_FPSINFO;
+
     }
 
     public static class ConfigDefaultValues {
@@ -112,6 +115,9 @@ public class Constants {
 
         // Whetever to show menu overlay or not (1/0)
         public static final int MENU_OVERLAY = 1;
+
+        // Whetever to show fps info or not
+        public static boolean FPS_INFO = false;
     }
 
     public static class GamingActionTargets {
@@ -125,6 +131,8 @@ public class Constants {
         public static final String DISABLE_AUTO_BRIGHTNESS = ConfigKeys.DISABLE_AUTO_BRIGHTNESS;
         // 性能配置
         public static final String PERFORMANCE_LEVEL = ConfigKeys.PERFORMANCE_LEVEL;
+
+        public static final String SHOW_FPSINFO = ConfigKeys.SHOW_FPSINFO;
     }
 
     public static class LocalConfigKeys {

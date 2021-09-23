@@ -19,6 +19,7 @@
     <string name="performance_text_for_performance">Performance</string>
 
     <string name="qs_auto_brightness">Auto brightness</string>
+    <string name="qs_fpsinfo">FPS</string>
     <string name="qs_danmaku">Danmaku</string>
     <string name="qs_dnd">Do not disturb</string>
     <string name="qs_lock_gesture">Lock gesture</string>

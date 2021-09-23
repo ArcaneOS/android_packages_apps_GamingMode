@@ -27,6 +27,7 @@ import org.exthmui.game.R;
 import org.exthmui.game.qs.AutoBrightnessTile;
 import org.exthmui.game.qs.DNDTile;
 import org.exthmui.game.qs.DanmakuTile;
+import org.exthmui.game.qs.FPSInfoTile;
 import org.exthmui.game.qs.LockGestureTile;
 import org.exthmui.game.qs.ScreenCaptureTile;
 import org.exthmui.game.qs.ScreenRecordTile;
@@ -56,6 +57,7 @@ public class QuickSettingsView extends LinearLayout {
         this.setPadding(0,0, 0,8);
 
         qsTiles = new TileBase[]{
+                new FPSInfoTile(context),
                 new ScreenCaptureTile(context),
                 new ScreenRecordTile(context),
                 new DanmakuTile(context),
@@ -65,7 +67,9 @@ public class QuickSettingsView extends LinearLayout {
         };
 
         for (TileBase tileBase : qsTiles) {
-            addView(tileBase);
+            if (tileBase.isAvailable()) {
+                addView(tileBase);
+            }
         }
     }
 
